@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VacaBot — TechSoluciones S.R.L.</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    #app {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #1a56db;
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+    }
+    .header h1 { font-size: 20px; font-weight: 600; letter-spacing: 0.5px; }
+    .header p  { font-size: 13px; opacity: 0.85; margin-top: 3px; }
+
+    /* ── Paso indicador ── */
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 0 6px;
+      background: #f0f4ff;
+      border-bottom: 1px solid #dde3f0;
+    }
+    .step {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #c7d2e8;
+      transition: background 0.3s;
+    }
+    .step.active { background: #1a56db; }
+    .step.done   { background: #0e9f6e; }
+
+    /* ── Chat ── */
+    .chat {
+      flex: 1;
+      padding: 1rem 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 280px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .msg { display: flex; gap: 8px; align-items: flex-end; }
+    .msg.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+    .msg.bot  .avatar { background: #dbeafe; }
+    .msg.user .avatar { background: #e5e7eb; }
+
+    .bubble {
+      max-width: 78%;
+      padding: 9px 13px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #111827;
+    }
+    .msg.bot  .bubble { background: #f1f5f9; border-bottom-left-radius: 4px; }
+    .msg.user .bubble { background: #dbeafe; color: #1e3a5f; border-bottom-right-radius: 4px; }
+    .bubble.success { background: #d1fae5; color: #065f46; }
+    .bubble.danger  { background: #fee2e2; color: #7f1d1d; }
+    .bubble.warning { background: #fef3c7; color: #78350f; }
+
+    /* ── Resumen ── */
+    .summary {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      line-height: 1.9;
+      color: #1e293b;
+      width: 100%;
+    }
+    .summary strong { color: #64748b; font-weight: 500; }
+
+    /* ── Input area ── */
+    .input-area {
+      padding: 0.9rem 1rem 1rem;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      flex: 1;
+      padding: 9px 12px;
+      font-size: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+      color: #111827;
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26,86,219,0.12); }
+
+    button {
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #1a56db;
+      color: #fff;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover  { background: #1648c0; }
+    button:active { transform: scale(0.97); }
+    button.secondary {
+      background: #f1f5f9;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+    button.secondary:hover { background: #e2e8f0; }
+
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0; }
+    .btn-group button { flex: 1; }
+
+    .err-msg {
+      font-size: 12px;
+      color: #dc2626;
+      margin-top: 6px;
+      min-height: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>&#127958; VacaBot</h1>
+    <p>TechSoluciones S.R.L. — Sistema de Gestión de Vacaciones</p>
+  </div>
+
+  <!-- Pasos -->
+  <div class="steps" id="steps">
+    <div class="step active" id="st0"></div>
+    <div class="step" id="st1"></div>
+    <div class="step" id="st2"></div>
+    <div class="step" id="st3"></div>
+    <div class="step" id="st4"></div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat" id="chat"></div>
+
+  <!-- Input -->
+  <div class="input-area" id="inputArea"></div>
+
+</div>
+
+<script>
+  /* ─── Base de datos (replica empleados.csv) ─── */
+  const EMPLEADOS = [
+    {legajo:"EMP001",nombre:"Ana",      apellido:"García",    area:"Desarrollo",      jefe_legajo:"EMP010",dias_totales:15,dias_usados:10,dias_disponibles:5},
+    {legajo:"EMP002",nombre:"Lucas",    apellido:"Pérez",     area:"Desarrollo",      jefe_legajo:"EMP010",dias_totales:15,dias_usados:15,dias_disponibles:0},
+    {legajo:"EMP003",nombre:"Sofía",    apellido:"Martínez",  area:"Soporte",         jefe_legajo:"EMP011",dias_totales:15,dias_usados:8, dias_disponibles:7},
+    {legajo:"EMP004",nombre:"Mateo",    apellido:"López",     area:"Soporte",         jefe_legajo:"EMP011",dias_totales:15,dias_usados:12,dias_disponibles:3},
+    {legajo:"EMP005",nombre:"Valentina",apellido:"Ruiz",      area:"Infraestructura", jefe_legajo:"EMP012",dias_totales:15,dias_usados:0, dias_disponibles:15},
+    {legajo:"EMP006",nombre:"Diego",    apellido:"Fernández", area:"Infraestructura", jefe_legajo:"EMP012",dias_totales:15,dias_usados:7, dias_disponibles:8},
+    {legajo:"EMP010",nombre:"Carolina", apellido:"Torres",    area:"Desarrollo",      jefe_legajo:"EMP020",dias_totales:15,dias_usados:4, dias_disponibles:11},
+    {legajo:"EMP011",nombre:"Rodrigo",  apellido:"Sánchez",   area:"Soporte",         jefe_legajo:"EMP020",dias_totales:15,dias_usados:6, dias_disponibles:9},
+    {legajo:"EMP012",nombre:"Puerto",   apellido:"Gómez",     area:"Infraestructura", jefe_legajo:"EMP020",dias_totales:15,dias_usados:2, dias_disponibles:13},
+  ];
+
+  /* ─── Estado de la sesión ─── */
+  let state = { step:0, emp:null, dias:0, fechaInicio:"", fechaFin:"" };
+
+  /* ─── Utilidades ─── */
+  const chat      = document.getElementById("chat");
+  const inputArea = document.getElementById("inputArea");
+
+  function buscarEmpleado(legajo) {
+    return EMPLEADOS.find(e => e.legajo.toUpperCase() === legajo.toUpperCase()) || null;
+  }
+
+  function sumarDias(fechaStr, dias) {
+    const [d,m,a] = fechaStr.split("/").map(Number);
+    const f = new Date(a, m-1, d);
+    f.setDate(f.getDate() + dias - 1);
+    return `${String(f.getDate()).padStart(2,"0")}/${String(f.getMonth()+1).padStart(2,"0")}/${f.getFullYear()}`;
+  }
+
+  function validarFecha(txt) {
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(txt.trim())) return false;
+    const [d,m,a] = txt.trim().split("/").map(Number);
+    const f = new Date(a, m-1, d);
+    if (f.getDate()!==d || f.getMonth()!==m-1 || f.getFullYear()!==a) return false;
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    return f >= hoy;
+  }
+
+  function setStep(n) {
+    for (let i = 0; i < 5; i++) {
+      const el = document.getElementById("st" + i);
+      el.className = "step" + (i < n ? " done" : i === n ? " active" : "");
+    }
+  }
+
+  function addMsg(html, tipo="bot", extra="") {
+    const div = document.createElement("div");
+    div.className = "msg " + tipo;
+    const icon = tipo === "bot" ? "&#129302;" : "&#128100;";
+    div.innerHTML = `<div class="avatar">${icon}</div><div class="bubble ${extra}">${html}</div>`;
+    chat.appendChild(div);
+    div.scrollIntoView({ behavior:"smooth" });
+  }
+
+  function clearInput() { inputArea.innerHTML = ""; }
+
+  /* ─── PASO 0: Ingresar legajo ─── */
+  function step0() {
+    setStep(0);
+    addMsg("Bienvenido/a al sistema de gestión de vacaciones de <strong>TechSoluciones S.R.L.</strong>");
+    addMsg("Por favor ingresá tu número de legajo (ej: EMP001):");
+    inputArea.innerHTML = `
+      <div class="input-row">
+        <input id="inp" type="text" placeholder="Legajo (ej: EMP001)" autocomplete="off" />
+        <button onclick="submitLegajo()">Ingresar</button>
+      </div>
+      <div class="err-msg" id="err"></div>`;
+    const inp = document.getElementById("inp");
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") submitLegajo(); });
+    inp.focus();
+  }
+
+  function submitLegajo() {
+    const val = document.getElementById("inp").value.trim().toUpperCase();
+    const err = document.getElementById("err");
+    if (!val) { err.textContent = "El legajo no puede estar vacío."; return; }
+    const emp = buscarEmpleado(val);
+    if (!emp) {
+      err.textContent = `Legajo '${val}' no encontrado. Probá con: EMP001, EMP003, EMP005…`;
+      return;
+    }
+    addMsg(val, "user");
+    state.emp = emp;
+    clearInput();
+    step1();
+  }
+
+  /* ─── PASO 1: Mostrar saldo y pedir días ─── */
+  function step1() {
+    setStep(1);
+    const emp = state.emp;
+    addMsg(`Legajo encontrado. Bienvenido/a, <strong>${emp.nombre} ${emp.apellido}</strong> (${emp.area}).`);
+    addMsg(`Días disponibles: <strong>${emp.dias_disponibles}</strong> de ${emp.dias_totales} totales.`);
+
+    if (emp.dias_disponibles === 0) {
+      addMsg("Lo sentimos, no tenés días disponibles. La solicitud no puede continuar.", "bot", "danger");
+      inputArea.innerHTML = `<div class="btn-group"><button onclick="reiniciar()">Nueva consulta</button></div>`;
+      return;
+    }
+
+    addMsg(`¿Cuántos días querés solicitar? (máximo ${emp.dias_disponibles}):`);
+    inputArea.innerHTML = `
+      <div class="input-row">
+        <input id="inp" type="number" min="1" max="${emp.dias_disponibles}" placeholder="Cantidad de días" />
+        <button onclick="submitDias()">Continuar</button>
+      </div>
+      <div class="err-msg" id="err"></div>`;
+    const inp = document.getElementById("inp");
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") submitDias(); });
+    inp.focus();
+  }
+
+  function submitDias() {
+    const val = parseInt(document.getElementById("inp").value);
+    const err = document.getElementById("err");
+    if (!val || val <= 0) { err.textContent = "Ingresá un número entero mayor a 0."; return; }
+    if (val > state.emp.dias_disponibles) {
+      err.textContent = `Solo tenés ${state.emp.dias_disponibles} días disponibles.`;
+      return;
+    }
+    addMsg(`${val} días`, "user");
+    state.dias = val;
+    clearInput();
+    step2();
+  }
+
+  /* ─── PASO 2: Fecha de inicio ─── */
+  function step2() {
+    setStep(2);
+    addMsg("¿Cuál es la fecha de inicio de tus vacaciones? (formato DD/MM/AAAA):");
+    inputArea.innerHTML = `
+      <div class="input-row">
+        <input id="inp" type="text" placeholder="DD/MM/AAAA" maxlength="10" />
+        <button onclick="submitFecha()">Continuar</button>
+      </div>
+      <div class="err-msg" id="err"></div>`;
+    const inp = document.getElementById("inp");
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") submitFecha(); });
+    inp.addEventListener("input", () => {
+      let v = inp.value.replace(/\D/g, "");
+      if (v.length > 2) v = v.slice(0,2) + "/" + v.slice(2);
+      if (v.length > 5) v = v.slice(0,5) + "/" + v.slice(5);
+      inp.value = v.slice(0, 10);
+    });
+    inp.focus();
+  }
+
+  function submitFecha() {
+    const val = document.getElementById("inp").value.trim();
+    const err = document.getElementById("err");
+    if (!validarFecha(val)) {
+      err.textContent = "Formato inválido o fecha anterior a hoy. Usá DD/MM/AAAA.";
+      return;
+    }
+    state.fechaInicio = val;
+    state.fechaFin    = sumarDias(val, state.dias);
+    addMsg(val, "user");
+    clearInput();
+    step3();
+  }
+
+  /* ─── PASO 3: Confirmación ─── */
+  function step3() {
+    setStep(3);
+    const emp = state.emp;
+    addMsg("Resumen de tu solicitud:");
+
+    const div = document.createElement("div");
+    div.className = "msg bot";
+    div.innerHTML = `
+      <div class="avatar">&#129302;</div>
+      <div class="bubble" style="width:100%;max-width:100%">
+        <div class="summary">
+          <div><strong>Empleado:</strong> ${emp.nombre} ${emp.apellido}</div>
+          <div><strong>Área:</strong> ${emp.area}</div>
+          <div><strong>Días solicitados:</strong> ${state.dias}</div>
+          <div><strong>Fecha inicio:</strong> ${state.fechaInicio}</div>
+          <div><strong>Fecha fin:</strong> ${state.fechaFin}</div>
+          <div><strong>Jefe (legajo):</strong> ${emp.jefe_legajo}</div>
+        </div>
+      </div>`;
+    chat.appendChild(div);
+    div.scrollIntoView({ behavior:"smooth" });
+
+    addMsg("¿Confirmás el envío de la solicitud?");
+    inputArea.innerHTML = `
+      <div class="btn-group">
+        <button onclick="submitConfirmar(true)">Sí, confirmar</button>
+        <button class="secondary" onclick="submitConfirmar(false)">No, cancelar</button>
+      </div>`;
+  }
+
+  function submitConfirmar(confirmado) {
+    addMsg(confirmado ? "Sí, confirmar" : "No, cancelar", "user");
+    clearInput();
+    if (!confirmado) {
+      addMsg("Solicitud cancelada. No se realizaron cambios.", "bot", "warning");
+      inputArea.innerHTML = `<div class="btn-group"><button onclick="reiniciar()">Nueva consulta</button></div>`;
+      return;
+    }
+    step4();
+  }
+
+  /* ─── PASO 4: Aprobación del jefe (simulada) ─── */
+  function step4() {
+    setStep(4);
+    addMsg(`Solicitud registrada. Notificando al jefe (${state.emp.jefe_legajo})...`);
+    setTimeout(() => {
+      const aprueba = state.emp.dias_disponibles - state.dias >= 0;
+      if (aprueba) {
+        const restantes = state.emp.dias_disponibles - state.dias;
+        addMsg(
+          `&#10003; Solicitud <strong>APROBADA</strong>. Tus ${state.dias} días fueron descontados. Días restantes: ${restantes}.`,
+          "bot", "success"
+        );
+      } else {
+        addMsg("&#10007; Solicitud <strong>RECHAZADA</strong>. Motivo: alta carga de trabajo en el área.", "bot", "danger");
+        addMsg("Podés intentar con otras fechas en una nueva consulta.");
+      }
+      inputArea.innerHTML = `<div class="btn-group"><button onclick="reiniciar()">Nueva consulta</button></div>`;
+    }, 1200);
+  }
+
+  /* ─── Reiniciar ─── */
+  function reiniciar() {
+    chat.innerHTML = "";
+    state = { step:0, emp:null, dias:0, fechaInicio:"", fechaFin:"" };
+    step0();
+  }
+
+  /* ─── Arrancar ─── */
+  step0();
+</script>
+
+</body>
+</html>
