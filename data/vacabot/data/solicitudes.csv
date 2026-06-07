@@ -1,6 +1,0 @@
-id_solicitud,legajo_empleado,fecha_inicio,fecha_fin,dias_solicitados,estado,legajo_jefe,fecha_solicitud,observacion
-SOL001,EMP001,01/07/2025,07/07/2025,5,Aprobada,EMP010,15/06/2025,
-SOL002,EMP003,14/07/2025,18/07/2025,5,Pendiente,EMP011,20/06/2025,En revisión
-SOL003,EMP004,21/07/2025,25/07/2025,5,Rechazada,EMP011,18/06/2025,Alta carga de trabajo
-SOL004,EMP001,01/08/2026,05/08/2026,5,Pendiente,EMP010,30/05/2026,
-SOL005,EMP001,01/08/2026,05/08/2026,5,Aprobada,EMP010,30/05/2026,
