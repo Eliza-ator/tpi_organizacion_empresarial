@@ -1,0 +1,11 @@
+legajo,nombre,apellido,area,jefe_legajo,dias_totales,dias_usados,dias_disponibles
+EMP001,Ana,García,Desarrollo,EMP010,15,10,5
+EMP002,Lucas,Pérez,Desarrollo,EMP010,15,15,0
+EMP003,Sofía,Martínez,Soporte,EMP011,15,8,7
+EMP004,Mateo,López,Soporte,EMP011,15,12,3
+EMP005,Valentina,Ruiz,Infraestructura,EMP012,15,0,15
+EMP006,Diego,Fernández,Infraestructura,EMP012,15,7,8
+EMP010,Carolina,Torres,Desarrollo,EMP020,15,4,11
+EMP011,Rodrigo,Sánchez,Soporte,EMP020,15,6,9
+EMP012,Marina,Gómez,Infraestructura,EMP020,15,2,13
+EMP020,Hernán,Díaz,Gerencia,,15,3,12
