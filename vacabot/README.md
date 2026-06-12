@@ -1,45 +1,57 @@
-VacaBot — TechSoluciones S.R.L.
-Chatbot de gestión de vacaciones desarrollado como Trabajo Práctico Integrador
-para la materia Organización Empresarial — TUPaD UTN.
+# VacaBot — TechSoluciones S.R.L.
 
-Requisitos
+Chatbot de gestión de vacaciones desarrollado como Trabajo Práctico Integrador para la materia Organización Empresarial — TUPaD UTN.
+
+## Requisitos
+
 - Python 3.8 o superior
 - No requiere librerías externas (solo módulos estándar)
 
-Cómo ejecutar
-bashpython chatbot.py
-Estructura del proyecto
+## Cómo ejecutar
+
+```bash
+python chatbot.py
+```
+
+## Estructura del proyecto
 vacabot/
+
 ├── chatbot.py          # Código principal del bot
+
 ├── README.md           # Este archivo
+
 └── data/
-    ├── empleados.csv   # Base de datos de empleados
-    ├── solicitudes.csv # Registro de solicitudes
-    └── estados_bot.csv # Máquina de estados (sesiones)
 
-Legajos de prueba
-LegajoNombreDías disponiblesCaso de pruebaEMP001Ana García10Flujo completoEMP002Lucas Pérez0Sin saldo (GW1 = No)EMP005Valentina Ruiz15Flujo completoEMP004Mateo López3Pocos días disponibles
-Proceso automatizado (BPMN To-Be)
+├── empleados.csv   # Base de datos de empleados
 
-Usuario ingresa legajo → Sistema valida en BD
-Sistema consulta saldo de días → GW1: ¿tiene días?
+├── solicitudes.csv # Registro de solicitudes
 
-NO → informa saldo insuficiente → Fin
-SÍ → usuario ingresa fechas
+└── estados_bot.csv # Máquina de estados (sesiones)
 
+## Legajos de prueba
 
-Usuario confirma solicitud → Sistema registra como Pendiente
-GW2: ¿jefe aprueba?
+| Legajo | Nombre | Días disponibles | Caso de prueba |
+|--------|--------|-----------------|----------------|
+| EMP001 | Ana García | 10 | Flujo completo |
+| EMP002 | Lucas Pérez | 0 | Sin saldo (GW1 = No) |
+| EMP005 | Valentina Ruiz | 15 | Flujo completo |
+| EMP004 | Mateo López | 3 | Pocos días disponibles |
 
-SÍ → descuenta días → Fin (Aprobada)
-NO → notifica rechazo → Fin (Rechazada)
+## Proceso automatizado (BPMN To-Be)
 
+1. Usuario ingresa legajo → Sistema valida en BD
+2. Sistema consulta saldo de días → **GW1: ¿tiene días?**
+   - ❌ NO → informa saldo insuficiente → Fin
+   - ✅ SÍ → usuario ingresa fechas
+3. Usuario confirma solicitud → Sistema registra como Pendiente
+4. **GW2: ¿jefe aprueba?**
+   - ✅ SÍ → descuenta días → Fin (Aprobada)
+   - ❌ NO → notifica rechazo → Fin (Rechazada)
 
+## Manejo de errores (Camino Infeliz)
 
-Manejo de errores (Camino Infeliz)
-
-Legajo inexistente → mensaje de error + reintento
-Cantidad de días inválida (texto, negativo, mayor al disponible) → reintento
-Fecha con formato incorrecto → reintento
-Fecha anterior a hoy → reintento
-Confirmación con texto no reconocido → reintento
+- Legajo inexistente → mensaje de error + reintento
+- Cantidad de días inválida (texto, negativo, mayor al disponible) → reintento
+- Fecha con formato incorrecto → reintento
+- Fecha anterior a hoy → reintento
+- Confirmación con texto no reconocido → reintento
